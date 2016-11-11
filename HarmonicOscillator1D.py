@@ -32,18 +32,19 @@ def putInPymol(array):
 	print array
 	# First cast array as strings
 	str_arr = [str(num) for num in array]
-	print str_arr
-	#file = open('testfile.pdb', 'w')
-	#file.write ('ATOM      1  H1   U 0  10      ' 
-	#						  + strx1 + '.000  ' + stry1 + '.000  ' 
-	#						  + strz1 + '.000 \n'
-	#		  + 'ATOM      2  H2   U 0  10      ' 
-	#						  + strx2 + '.000  ' + stry2 + '.000  ' 
-	#						  + strz2 + '.000 \n'
-	#		  + 'ATOM      3  H3   U 0  10      ' 
-	#						  + strx3 + '.000  ' + stry3 + '.000  ' 
-	#						  + strz3 + '.000 \n')
-	#file.close()
+	
+	# put into PyMol readable format
+	file = open('testfile.pdb', 'w')
+	file.write ('ATOM      1  H1   U 0  10      ' 
+				+ strx1 + '.000  ' + stry1 + '.000  ' 
+				+ strz1 + '.000 \n'
+			  + 'ATOM      2  H2   U 0  10      ' 
+				+ strx2 + '.000  ' + stry2 + '.000  ' 
+				+ strz2 + '.000 \n'
+			  + 'ATOM      3  H3   U 0  10      ' 
+				+ strx3 + '.000  ' + stry3 + '.000  ' 
+				+ strz3 + '.000 \n')
+	file.close()
 
 
 
@@ -52,7 +53,8 @@ class Test(unittest.TestCase):
     data1 = [(2, (2, 3)),
     		(3, (3, 3)),
     		(0, (0, 3))]
-    data2 = [[2, 3],
+    data2 = 
+    data3 = [[2, 3],
     		 [3, 4, 4]]
 
     # test to see if generateAtoms generates
@@ -64,11 +66,11 @@ class Test(unittest.TestCase):
 
     # test to see if calculateV generates values
     # COMPARE TO CALCULATED?
-    #def test_calculateV(self):
-   	#	for array in self.data2:
+    def test_calculateV(self):
+   		for array in self.data2:
 
    	def test_putInPymol(self):
-   		for array in self.data2:
+   		for array in self.data3:
    			putInPymol(array)
 
 
