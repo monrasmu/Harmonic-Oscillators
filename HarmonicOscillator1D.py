@@ -25,20 +25,23 @@ def calculateV(array):
 	# calculation of LJ potential using possible radii
 	# returns potential in kJ/mol
 	npArray = np.array(array)
-
+	
 	# first generate matrix of nearest neighbors using KD tree
 	# generate grid
 	x, y, z = np.mgrid[0:5, 0:5, 0:5]
 
-	# zip into tuples
-	data = zip(x.ravel(), y.ravel(), z.ravel())
-
-	# index nearest neighbors
-	KDtree = spatial.KDTree(data)
+	# query tree for nearest neighbors
+	KDtree = spatial.KDTree(zip(x.ravel(), y.ravel(), z.ravel()))
 
 	# then find all points within distance r of point x
-	ball = KDtree.query_ball_point(npArray, 3)
-	distance, index = KDtree.query(npArray)
+	example_point = [2, 3, 2]
+	ball = KDtree.query_ball_point(example_point, 3)
+
+	# query the tree, assign to distance
+	distance = KDtree.query(example_point, 3)
+	print distance
+
+	"""
 	pts = npArray
 	KDtree.query(pts)
 
@@ -51,15 +54,15 @@ def calculateV(array):
 	closestPoints = heapq.nsmallest(1, enumerate(pts), 
 		key=lambda y: euclideanDistance(x, y[1]).any())
 
+
 	print closestPoints
-	radius = 
+	
+	"""
+	#radius = 
 
 	# HALP
-	_V = ((4 * _e) * (((_d / radius) ** 12) - ((_d / radius) ** 6)))
-	return _V
-
-	# used this site for help:
-	# http://code.activestate.com/recipes/578434-a-simple-kd-tree-example-with-custom-euclidean-dis/
+	#_V = ((4 * _e) * (((_d / radius) ** 12) - ((_d / radius) ** 6)))
+	#return _V
 
 	
 
