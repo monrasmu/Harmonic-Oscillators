@@ -69,32 +69,6 @@ def calculateV(array):
 
 	
 	
-	"""
-	# First I tried it my way :(
-	x = np.array(array)
-	flatArray = x.flatten()
-	size = flatArray.shape
-	print flatArray
-	
-	for n in range(size[0] - 5):
-		radius_xy = ((float(flatArray[n]) - float(flatArray[n + 3])) ** 2 +
-					 (float(flatArray[n + 1]) - float(flatArray[n + 4])) ** 2 +
-					 (float(flatArray[n + 2]) - float(flatArray[n + 5])) ** 2)
-	for n in range(size[0] - 5):
-		radius_yz =  ((float(flatArray[n]) - float(flatArray[n + 3])) ** 2 +
-					 (float(flatArray[n + 1]) - float(flatArray[n + 4])) ** 2 +
-					 (float(flatArray[n + 2]) - float(flatArray[n + 5])) ** 2)
-
-	for n in range(size[0] - 5):
-		radius_xz =  ((float(flatArray[n]) - float(flatArray[n + 3])) ** 2 +
-					 (float(flatArray[n + 1]) - float(flatArray[n + 4])) ** 2 +
-					 (float(flatArray[n + 2]) - float(flatArray[n + 5])) ** 2)
-
-		radius = cmath.sqrt(radius_xy + radius_yz + radius_xz)
-		radiusList = []
-		radiusList.append(radius)
-		print radiusLi
-	"""
 
 def putInPymol(array):
 	# First cast array as strings
