@@ -26,46 +26,49 @@ def calculateV(array):
 	# returns potential in kJ/mol
 	npArray = np.array(array)
 	
-	# first generate matrix of nearest neighbors using KD tree
-	# generate grid
+	# generate grid of points to query
 	x, y, z = np.mgrid[0:5, 0:5, 0:5]
 
+	# Assign data
+	tree = spatial.KDTree(zip(x.ravel(), y.ravel(), z.ravel()))
+	
 	# query tree for nearest neighbors
-	KDtree = spatial.KDTree(zip(x.ravel(), y.ravel(), z.ravel()))
+	# returns array of floats giving distance to NNs
+	# returns array of integers giving location of neighbors in tree.data
+	tree.query(npArray)
 
 	# then find all points within distance r of point x
-	example_point = [2, 3, 2]
-	ball = KDtree.query_ball_point(example_point, 3)
+	# returns array of tuples with lists of neighbors
+	ball = tree.query_ball_point(npArray, 1)
+	
+	# find all points distance r away
+	# returns indices of neighbors
+	neighbors = tree.query_ball_tree(tree, 1)
 
-	# query the tree, assign to distance
-	distance = KDtree.query(example_point, 3)
-	print distance
+	# returns all pairs of points within distance r of ...?
+	pairs = tree.query_pairs(1)
 
-	"""
-	pts = npArray
-	KDtree.query(pts)
-
-	def euclideanDistance(x,y):
+	# need to put in 3d
+	def distance(x,y,z):
 		dist = np.sqrt(sum([(a-b) ** 2 for (a,b) in zip(x,y)]))
 		return dist
 
 	# Utilize heap q algorithm (binary tree)
-	# Sorts dataset to find smallest radius
-	closestPoints = heapq.nsmallest(1, enumerate(pts), 
-		key=lambda y: euclideanDistance(x, y[1]).any())
-
-
+	# Sorts dataset to find closet point by distance formula
+	# returns 1 if no neighbor
+	closestX, closestY, closestZ = heapq.nsmallest(1, enumerate(pairs), 
+		key=lambda y: distance(x, y[1]).any())
 	print closestPoints
+
+	# why is closet points a tuple of tuples?
+
+	radius = distance(closestX, closestY)
 	
-	"""
-	#radius = 
-
-	# HALP
-	#_V = ((4 * _e) * (((_d / radius) ** 12) - ((_d / radius) ** 6)))
-	#return _V
+	_V = ((4 * _e) * (((_d / radius) ** 12) - ((_d / radius) ** 6)))
+	return _V
 
 	
-
+	
 	"""
 	# First I tried it my way :(
 	x = np.array(array)
@@ -139,12 +142,14 @@ class Test(unittest.TestCase):
 			 [1, 1, 1],
 			 [2, 2, 2])]
 
+	"""
 	# test to see if generateAtoms generates
 	# the right size array
 	def test_generateAtoms(self):
 		for [test_num, expected_size] in self.data1:
 		    (actual_array, actual_size) = generateAtoms(test_num)
 		    self.assertEqual(actual_size, expected_size)
+	"""
 
 	# test to see if calculateV generates values
 	# COMPARE TO CALCULATED?
@@ -152,11 +157,12 @@ class Test(unittest.TestCase):
 		for array in self.data3:
 			calculateV(array)
 
+	"""
 	# test putting arrays into Pymol coords
 	def test_putInPymol(self):
    		for array in self.data3:
    			putInPymol(array)
-	
+	"""
 
 
 
