@@ -22,53 +22,66 @@ def generateAtoms(num):
 	return array, array_size
 
 def calculateV(array):
+	# in 2d for now
 	# calculation of LJ potential using possible radii
-	# returns potential in kJ/mol
-	npArray = np.array(array)
-	
-	# generate grid of points to query
-	x, y, z = np.mgrid[0:5, 0:5, 0:5]
+	# input matrix in 2d
+	# returns potential in kJ/mol as an array
 
 	# Assign data
-	tree = spatial.KDTree(zip(x.ravel(), y.ravel(), z.ravel()))
-	
+	tree = spatial.KDTree(array)
+
 	# query tree for nearest neighbors
 	# returns array of floats giving distance to NNs
 	# returns array of integers giving location of neighbors in tree.data
-	tree.query(npArray)
+	tree.query(array, k=1)
+	print tree.data, '\n'
 
 	# then find all points within distance r of point x
 	# returns array of tuples with lists of neighbors
-	ball = tree.query_ball_point(npArray, 1)
+	ball = tree.query_ball_point(array, r=2)
+	print ball, '\n'
 	
 	# find all points distance r away
 	# returns indices of neighbors
-	neighbors = tree.query_ball_tree(tree, 1)
+	#neighbors = tree.query_ball_tree(tree, 1)
+	#print neighbors, '\n'
 
 	# returns all pairs of points within distance r of ...?
 	pairs = tree.query_pairs(1)
 
-	# need to put in 3d
-	def distance(x,y,z):
-		dist = np.sqrt(sum([(a-b) ** 2 for (a,b) in zip(x,y)]))
+	print array[pairs], '\n'
+	
+
+	# need to put in 3d later
+	def distance(x,y):
+		#subtract = np.subtract(for (a,b) in x,y)
+		sumArray = np.sum([(a-b) ** 2 for (a,b) in zip(x,y)])
+		dist = np.sqrt(sumArray)
+		print dist
 		return dist
 
 	# Utilize heap q algorithm (binary tree)
 	# Sorts dataset to find closet point by distance formula
 	# returns 1 if no neighbor
-	closestX, closestY, closestZ = heapq.nsmallest(1, enumerate(pairs), 
-		key=lambda y: distance(x, y[1]).any())
-	print closestPoints
+	closestX, closestY= heapq.nsmallest(1, enumerate(pairs), 
+		key=lambda y: distance(x, y).any())
+	print closestX, closestY
 
 	# why is closet points a tuple of tuples?
 
 	radius = distance(closestX, closestY)
 	
 	_V = ((4 * _e) * (((_d / radius) ** 12) - ((_d / radius) ** 6)))
+	print _V
 	return _V
 
-	
-	
+def moveMolecule(array):
+	for x,y in array:
+		if calculateV(array) != 0:
+			np.add(array[x][y], 0.1)
+		else: 
+			return array
+
 
 def putInPymol(array):
 	# First cast array as strings
@@ -112,9 +125,8 @@ class Test(unittest.TestCase):
 			 [5, 1, 5],
 			 [4, 2, 3])]
 
-	data3 = [([0, 0, 0],
-			 [1, 1, 1],
-			 [2, 2, 2])]
+	easy = [([0, 0],
+			 [0, 1])]
 
 	"""
 	# test to see if generateAtoms generates
@@ -128,7 +140,7 @@ class Test(unittest.TestCase):
 	# test to see if calculateV generates values
 	# COMPARE TO CALCULATED?
 	def test_calculateV(self):
-		for array in self.data3:
+		for array in self.easy:
 			calculateV(array)
 
 	"""
