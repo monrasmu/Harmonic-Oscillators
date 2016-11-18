@@ -22,27 +22,26 @@ def generateAtoms(num):
 	return array, array_size
 
 def calculateV(array):
-	# in 2d for now
 	# calculation of LJ potential using possible radii
 	# input matrix in 2d
 	# returns potential in kJ/mol as an array
 
 	points = tuple(map(tuple, array))
+	radius = []
+	_V = []
 
-	# query tree for nearest neighbors
+	# query tree for nearest neighbors using KD tree
 	# returns array of floats giving distance to NNs
 	# returns array of integers giving indices of neighbors in tree.data
 	for n in points:
 		output = [i for i in points if i != n]
-		print output
 		tree = spatial.KDTree(output)
 		dist, indices = tree.query(n)
-		print dist
-		radius = []
 		radius.append(dist)
 	print radius
 	
-	_V = ((4 * _e) * (((_d / radius) ** 12) - ((_d / radius) ** 6)))
+	for r in radius:
+		_V.append((4 * _e) * (((_d / r) ** 12) - ((_d / r) ** 6)))
 	print _V
 	return _V
 
@@ -99,7 +98,7 @@ class Test(unittest.TestCase):
 
 	easy = [([0, 0],
 			 [1, 1],
-			 [2, 0])]
+			 [1, 0])]
 
 	"""
 	# test to see if generateAtoms generates
