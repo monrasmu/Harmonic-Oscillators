@@ -27,53 +27,25 @@ def calculateV(array):
 	# input matrix in 2d
 	# returns potential in kJ/mol as an array
 
-	# Assign data
-	tree = spatial.KDTree(array)
+	points = tuple(map(tuple, array))
 
 	# query tree for nearest neighbors
 	# returns array of floats giving distance to NNs
-	# returns array of integers giving location of neighbors in tree.data
-	tree.query(array, k=1)
-	print tree.data, '\n'
-
-	# then find all points within distance r of point x
-	# returns array of tuples with lists of neighbors
-	ball = tree.query_ball_point(array, r=2)
-	print ball, '\n'
-	
-	# find all points distance r away
-	# returns indices of neighbors
-	#neighbors = tree.query_ball_tree(tree, 1)
-	#print neighbors, '\n'
-
-	# returns all pairs of points within distance r of ...?
-	pairs = tree.query_pairs(1)
-
-	print array[pairs], '\n'
-	
-
-	# need to put in 3d later
-	def distance(x,y):
-		#subtract = np.subtract(for (a,b) in x,y)
-		sumArray = np.sum([(a-b) ** 2 for (a,b) in zip(x,y)])
-		dist = np.sqrt(sumArray)
+	# returns array of integers giving indices of neighbors in tree.data
+	for n in points:
+		output = [i for i in points if i != n]
+		print output
+		tree = spatial.KDTree(output)
+		dist, indices = tree.query(n)
 		print dist
-		return dist
-
-	# Utilize heap q algorithm (binary tree)
-	# Sorts dataset to find closet point by distance formula
-	# returns 1 if no neighbor
-	closestX, closestY= heapq.nsmallest(1, enumerate(pairs), 
-		key=lambda y: distance(x, y).any())
-	print closestX, closestY
-
-	# why is closet points a tuple of tuples?
-
-	radius = distance(closestX, closestY)
+		radius = []
+		radius.append(dist)
+	print radius
 	
 	_V = ((4 * _e) * (((_d / radius) ** 12) - ((_d / radius) ** 6)))
 	print _V
 	return _V
+
 
 def moveMolecule(array):
 	for x,y in array:
@@ -126,7 +98,8 @@ class Test(unittest.TestCase):
 			 [4, 2, 3])]
 
 	easy = [([0, 0],
-			 [0, 1])]
+			 [1, 1],
+			 [2, 0])]
 
 	"""
 	# test to see if generateAtoms generates
