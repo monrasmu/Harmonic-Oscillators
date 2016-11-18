@@ -7,6 +7,7 @@ import numpy as np
 from scipy import spatial
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from scipy.optimize import fmin
 
 # constants from LJ potential
 # e: H well depth
@@ -48,9 +49,12 @@ def calculateV(array):
 
 
 def moveMolecule(array):
-	addArray = np.random.rand(len(array), 3)
+	addArray = np.random.randint(low=-2, high=2, size=(len(array),3))
+	x0 = np.array([0, 0, 0])
+	minV = fmin(calculateV,x0)
+	print minV
 	for x,y,z in array:
-		while calculateV(array) != [0,0,0]:
+		while calculateV(array) != minV:
 			array = np.add(array, addArray)
 
 
