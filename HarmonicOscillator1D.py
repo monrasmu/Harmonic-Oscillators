@@ -3,10 +3,10 @@
 # bond distance for n H2 atoms
 
 import unittest
-import cmath
 import numpy as np
 from scipy import spatial
-import heapq
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 # constants from LJ potential
 # e: H well depth
@@ -14,21 +14,20 @@ import heapq
 _e = 7.607e-19    # kJ/mol
 _d = 1.2          # angstroms
 
-
 def generateAtoms(num):
 	# generates a random 3D array of n x 3 size
 	array = np.random.rand(num, 3)
 	array_size = array.shape
 	return array, array_size
 
+
 def calculateV(array):
 	# calculation of LJ potential using possible radii
-	# input matrix in 2d
-	# returns potential in kJ/mol as an array
-
+	# input matrix
+	# returns potential in kJ/mol as an list with closest neighbor
 	points = tuple(map(tuple, array))
 	radius = []
-	_V = []
+	V = []
 
 	# query tree for nearest neighbors using KD tree
 	# returns array of floats giving distance to NNs
@@ -38,20 +37,21 @@ def calculateV(array):
 		tree = spatial.KDTree(output)
 		dist, indices = tree.query(n)
 		radius.append(dist)
-	print radius
 	
 	for r in radius:
-		_V.append((4 * _e) * (((_d / r) ** 12) - ((_d / r) ** 6)))
-	print _V
-	return _V
+		V.append((4 * _e) * (((_d / r) ** 12) - ((_d / r) ** 6)))
+	return V
+
+	plt.plot(points)
+	plt.show()
+
 
 
 def moveMolecule(array):
-	for x,y in array:
-		if calculateV(array) != 0:
-			np.add(array[x][y], 0.1)
-		else: 
-			return array
+	for x,y,z in array:
+		while calculateV(array) != 0:
+			np.add(array[x][y][z], 0.1)
+			print 
 
 
 def putInPymol(array):
@@ -84,43 +84,47 @@ def putInPymol(array):
 class Test(unittest.TestCase):
 	data1 = [(2, (2, 3)), (3, (3, 3)), (0, (0, 3))]
 
-	data2 = [([2, 3, 4],
-			 [1, 4, 1],
-			 [3, 2, 1]),
-			([0, 0, 0],
-			 [1, 1, 1],
-			 [2, 2, 2]),
-			([2, 3, 3],
-			 [2, 5, 3],
-			 [4, 2, 2],
-			 [5, 1, 5],
-			 [4, 2, 3])]
+	data2 = [([2, 3],
+			 [1, 4],
+			 [3, 2]),
+			([2, 3],
+			 [2, 5],
+			 [4, 2],
+			 [5, 1],
+			 [4, 3])]
 
-	easy = [([0, 0],
-			 [1, 1],
-			 [1, 0])]
+	easy = [([0, 0, 0],
+			 [1, 1, 0],
+			 [3, 1, 0])]
 
-	"""
+
 	# test to see if generateAtoms generates
 	# the right size array
 	def test_generateAtoms(self):
 		for [test_num, expected_size] in self.data1:
 		    (actual_array, actual_size) = generateAtoms(test_num)
 		    self.assertEqual(actual_size, expected_size)
-	"""
+
 
 	# test to see if calculateV generates values
-	# COMPARE TO CALCULATED?
+	# compare to calculated values
 	def test_calculateV(self):
 		for array in self.easy:
-			calculateV(array)
+			calculated_V = calculateV(array)
+			actual_V = [-7.1181416371322853e-19, 
+			-7.1181416371322853e-19, -1.3534136350801918e-19]
+			self.assertEqual(calculated_V, actual_V)
 
-	"""
+
 	# test putting arrays into Pymol coords
 	def test_putInPymol(self):
-   		for array in self.data3:
+   		for array in self.easy:
    			putInPymol(array)
-	"""
+
+   	def test_moveMolecules(self):
+   		for array in self.easy:
+   			moveMolecule(array)
+
 
 
 
