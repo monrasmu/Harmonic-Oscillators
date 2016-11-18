@@ -40,18 +40,18 @@ def calculateV(array):
 	
 	for r in radius:
 		V.append((4 * _e) * (((_d / r) ** 12) - ((_d / r) ** 6)))
+	print V
 	return V
 
 	plt.plot(points)
 	plt.show()
 
 
-
 def moveMolecule(array):
+	addArray = np.random.rand(len(array), 3)
 	for x,y,z in array:
-		while calculateV(array) != 0:
-			np.add(array[x][y][z], 0.1)
-			print 
+		while calculateV(array) != [0,0,0]:
+			array = np.add(array, addArray)
 
 
 def putInPymol(array):
