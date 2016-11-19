@@ -45,7 +45,6 @@ def calculateV(array):
 	# Calculate potential for NNs
 	for r in radius:
 		V.append((4 * _e) * (((_d / r) ** 12) - ((_d / r) ** 6)))
-	print V
 	return V
 
 	plt.plot(points)
