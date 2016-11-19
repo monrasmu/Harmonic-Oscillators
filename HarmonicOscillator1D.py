@@ -9,36 +9,40 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from scipy.optimize import fmin
 
-# constants from LJ potential
+# Constants from LJ potential
 # e: H well depth
 # d: H van der Waals radius
 _e = 7.607e-19    # kJ/mol
 _d = 1.2          # angstroms
 
 def generateAtoms(num):
-	# generates a random 3D array of n x 3 size
+	# Generates a random 3D array of n x 3 size
 	array = np.random.rand(num, 3)
 	array_size = array.shape
 	return array, array_size
 
 
+def euclideanDist(point1, point2):
+	return spatial.distance.euclidean(point1, point2)
+
+
 def calculateV(array):
-	# calculation of LJ potential using possible radii
-	# input matrix
-	# returns potential in kJ/mol as an list with closest neighbor
+	# Calculation of LJ potential using possible radii
+	# Returns potential in kJ/mol as an list with closest neighbor(s)
 	points = tuple(map(tuple, array))
 	radius = []
 	V = []
 
-	# query tree for nearest neighbors using KD tree
-	# returns array of floats giving distance to NNs
-	# returns array of integers giving indices of neighbors in tree.data
+	# Query tree for nearest neighbors using KD tree
+	# Returns indices of NN
 	for n in points:
 		output = [i for i in points if i != n]
 		tree = spatial.KDTree(output)
-		dist, indices = tree.query(n)
-		radius.append(dist)
+		index = tree.query_ball_point(x=n, r=3)
+		for i in index:
+			radius.append(euclideanDist(tree.data[i], n))
 	
+	# Calculate potential for NNs
 	for r in radius:
 		V.append((4 * _e) * (((_d / r) ** 12) - ((_d / r) ** 6)))
 	print V
@@ -49,11 +53,12 @@ def calculateV(array):
 
 
 def moveMolecule(array):
-	addArray = np.random.randint(low=-2, high=2, size=(len(array),3))
-	x0 = np.array([0, 0, 0])
+	x0 = [0, 0, 0]
 	minV = fmin(calculateV,x0)
 	print minV
+
 	for x,y,z in array:
+		addArray = np.random.randint(low=-2, high=2, size=(len(array),3))
 		while calculateV(array) != minV:
 			array = np.add(array, addArray)
 
@@ -64,14 +69,14 @@ def putInPymol(array):
 		return map(str, myArray)
 	str_arr = map(makeStr, array)
 
-	# get dimensions of array and flatten to make life easier
+	# Get dimensions of array and flatten to make life easier
 	x = np.array(str_arr)
 	flatArray = x.flatten()
 	size = flatArray.shape
 
-	# put into PyMol readable format
-	# must iterate every 3 as we've flattened the array
-	# want format: ATOM      0  H0   U 0  10      x y z
+	# Put into PyMol readable format
+	# Must iterate every 3 as we've flattened the array
+	# Want format: ATOM      0  H0   U 0  10      x y z
 	# LATER FIX TO PUT M LOOP ON OUTSIDE--DEFINE ATOMS CORRECTLY
 	file = open('testfile.pdb', 'w')
 	for n in range(0, size[0] - 2, 3):
@@ -102,7 +107,7 @@ class Test(unittest.TestCase):
 			 [3, 1, 0])]
 
 
-	# test to see if generateAtoms generates
+	# Test to see if generateAtoms generates
 	# the right size array
 	def test_generateAtoms(self):
 		for [test_num, expected_size] in self.data1:
@@ -110,24 +115,28 @@ class Test(unittest.TestCase):
 		    self.assertEqual(actual_size, expected_size)
 
 
-	# test to see if calculateV generates values
-	# compare to calculated values
+	# Test to see if calculateV generates values
+	# Compare to calculated values
 	def test_calculateV(self):
 		for array in self.easy:
 			calculated_V = calculateV(array)
 			actual_V = [-7.1181416371322853e-19, 
-			-7.1181416371322853e-19, -1.3534136350801918e-19]
+			-7.1181416371322853e-19, -1.3534136350801918e-19, 
+			-1.3534136350801918e-19]
 			self.assertEqual(calculated_V, actual_V)
 
 
-	# test putting arrays into Pymol coords
+
+	# Test putting arrays into Pymol coords
 	def test_putInPymol(self):
    		for array in self.easy:
    			putInPymol(array)
 
+   	
    	def test_moveMolecules(self):
    		for array in self.easy:
    			moveMolecule(array)
+   	
 
 
 
