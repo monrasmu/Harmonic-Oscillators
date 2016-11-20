@@ -131,11 +131,15 @@ def plot(x, y, z):
 	ax = fig.add_subplot(111, projection='3d')
 
 	# Increase size of points as steps increase
-	area = [2*n for n in range(len(ptx1))]
-	
-	ax.scatter(ptx1, pty1, ptz1, s=area, c='red')
-	ax.scatter(ptx2, pty2, ptz2, s=area, c='blue')
-	ax.scatter(ptx3, pty3, ptz3, s=area, c='green')
+	area = [8*n for n in range(len(ptx1))]
+
+	# animate, iterating by i-th element from points
+	def animate(i):
+		ax.scatter(ptx1[:i], pty1[:i], ptz1[:i], s=area, c='red')
+		ax.scatter(ptx2[:i], pty2[:i], ptz2[:i], s=area, c='blue')
+		ax.scatter(ptx3[:i], pty3[:i], ptz3[:i], s=area, c='green')
+
+	ani = FuncAnimation(fig, animate, frames=len(ptx1), interval=500)
 	
 	plt.show()
 	
