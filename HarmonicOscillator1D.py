@@ -7,14 +7,14 @@ import numpy as np
 from scipy import spatial
 import matplotlib.pyplot as plt
 import matplotlib.lines as line
-import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
 
 # Constants from LJ potential
 # e: H well depth
 # d: H van der Waals radius
-_e = 7.607e-19    # kJ/mol
-_d = 1.2          # angstroms
+# Wilhelm, E.; Battino, R. J Chem Physics 1971, 55, 4012
+_e = 0.09794  # kj/mol
+_d = 1.09     # angstroms
 
 # Number of atoms
 # Variable to be changed as needed
@@ -57,9 +57,7 @@ def calculateV(array):
 
 def moveMolecule(array):
 	# Moves molecules around to find minimum bond distance
-	# Stop when potential below ???
-	# FIND VALUE THAT MAKES SENSE
-	# MAKE BETTER ADDARRAY
+	# Stop when potential below LJ potential for H2
 	# Plots path of points
 	# Puts final output into Pymol
 
@@ -68,25 +66,39 @@ def moveMolecule(array):
 	y = []
 	z = []
 
-	while all(V > -7.2e-19 for V in calculateV(array)):
-		addArray = np.random.uniform(low=0, high=0.001, size=(len(array),3))
+	# Moves molecules in random directions by adding random array
+	# Increase step size by increasing 'high'
+	while all(V > -0.097 for V in calculateV(array)):
+		addArray = np.random.uniform(low=0, high=0.01, size=(len(array),3))
 		array = np.add(array, addArray)
 		points.append(array)
 
 
 	# Extract points for plotting
 	points = np.squeeze(points)
-	print points
+
 	for i in points:
 		for j in i:
 			x.append(j[0])
 			y.append(j[1])
 			z.append(j[2])
 
-	finalPoints =  ???
+	finalPoint1 = (x[-3], y[-3], z[-3])
+	finalPoint2 = (x[-2], y[-2], z[-2])
+	finalPoint3 = (x[-1], y[-1], z[-1])
+	finalPoints = []
+	finalPoints.append(finalPoint1)
+	finalPoints.append(finalPoint2)
+	finalPoints.append(finalPoint3)
+
 	putInPymol(finalPoints)
 
+	print 'between 1 and 2: ', euclideanDist(finalPoint1, finalPoint2)
+	print 'between 1 and 3: ', euclideanDist(finalPoint1, finalPoint3)
+	print 'between 2 and 3: ', euclideanDist(finalPoint3, finalPoint2)
+
 	plot(x, y, z)
+
 
 
 def plot(x, y, z):
@@ -110,43 +122,35 @@ def plot(x, y, z):
 	ax.scatter(ptx2, pty2, ptz2, c='blue')
 	ax.scatter(ptx3, pty3, ptz3, c='green')
 
-	"""
-	def animate(n, data, scatter):
-		scatter.set_array(data[n])
-   		return scatter,
-
-	ani = animation.FuncAnimation(fig, animate, frames=200)
-	"""
-
 	plt.show()
 	
 
 def putInPymol(array):
 	# Organizes array into Pymol readable format
 
-	# First cast array as strings
-	def makeStr(myArray):
-		return map(str, myArray)
-	str_arr = map(makeStr, array)
-
 	# Get dimensions of array and flatten to make life easier
-	x = np.array(str_arr)
+	x = np.array(array)
 	flatArray = x.flatten()
 	size = flatArray.shape
 
-	# Must iterate every 3 as we've flattened the array
+	# Round floats
+	for n in range(size[0]):
+		flatArray[n] = round(flatArray[n], 3)
+
+	# Cast array as strings
+	stringArray = map(str, flatArray)
+
 	# Want format: ATOM      0  H0   U 0  10      x y z
-	# LATER FIX TO PUT M LOOP ON OUTSIDE--DEFINE ATOMS CORRECTLY
+	# Must iterate every 3 as we've flattened the array
 	file = open('testfile.pdb', 'w')
 	for n in range(0, size[0] - 2, 3):
-		file.write ('ATOM      ' + str(n) + '  H' + str(n) 
+		file.write ('ATOM      ' + str(n / 3) + '  H' + str(n / 3) 
 					+ '   U 0  10      ' )
-		file.write(flatArray[n] + '.000  ' 
-				 + flatArray[n + 1] + '.000  '
-				 + flatArray[n + 2] + '.000  ')
+		file.write(stringArray[n] + " "
+				 + stringArray[n + 1] + " "
+				 + stringArray[n + 2])
 		file.write('\n')
 	file.close()
-
 
 
 class Test(unittest.TestCase):
@@ -173,7 +177,7 @@ class Test(unittest.TestCase):
 		    (actual_array, actual_size) = generateAtoms(test_num)
 		    self.assertEqual(actual_size, expected_size)
 	"""
-
+	"""
 	# Test to see if calculateV generates values
 	# Compare to calculated values
 	def test_calculateV(self):
@@ -183,11 +187,13 @@ class Test(unittest.TestCase):
 			-7.1181416371322853e-19, -1.3534136350801918e-19, 
 			-1.3534136350801918e-19]
 			self.assertEqual(calculated_V, actual_V)
-
+	"""
+	"""
 	# Test putting arrays into Pymol coords
 	def test_putInPymol(self):
    		for array in self.easy:
-   			putInPymol(array)
+   			putInPymol(array0
+   	"""
 
    	def test_moveMolecules(self):
    		for array in self.easy:
