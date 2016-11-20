@@ -21,6 +21,13 @@ _d = 1.09     # angstroms
 # Variable to be changed as needed
 num = 3
 
+def doItAll(num):
+	# It does it all!
+	# Generates random atoms and moves them to minimums
+	array = generateAtoms(num)
+	moveMolecule(array)
+
+
 def generateAtoms(num):
 	# Generates a random 3D array of num x 3 size
 	array = np.random.rand(num, 3)
@@ -104,7 +111,6 @@ def moveMolecule(array):
 	print 'between 2 and 3: ', euclideanDist(finalPoint3, finalPoint2)
 
 	plot(x, y, z)
-
 
 
 def plot(x, y, z):
@@ -197,19 +203,13 @@ class Test(unittest.TestCase):
 	# Test putting arrays into Pymol coords
 	def test_putInPymol(self):
    		for array in self.easy:
-   			putInPymol(array0
+   			putInPymol(array)
    	"""
 
 
-   	def test_All(self):
-   		array = generateAtoms(num)
-   		print array
-   		moveMolecule(array)
-   		"""
-   		for array in self.easy:
-   			moveMolecule(array)
-   		"""
-   	
+   	def test_doItAll(self):
+   		doItAll(num)
+
 
 if __name__ == "__main__":
 	unittest.main()
