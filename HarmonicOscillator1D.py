@@ -9,6 +9,7 @@ from scipy import spatial
 import matplotlib.pyplot as plt
 import matplotlib.lines as line
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.animation import FuncAnimation
 
 # Constants from LJ potential
 # e: H well depth
@@ -65,6 +66,7 @@ def calculateV(array):
 	# Calculate potential for NNs
 	for r in radius:
 		V.append((4 * _e) * (((_d / r) ** 12) - ((_d / r) ** 6)))
+		print V
 	return V
 
 
@@ -81,9 +83,8 @@ def moveMolecule(array):
 
 	# Moves molecules in random directions by adding random array
 	# Cutoff value chosen from minimum of function
-	while all(V > -0.09 for V in calculateV(array)):
+	while all(V > -0.097 for V in calculateV(array)):
 		addArray = np.random.random_sample(size=(len(array),3))
-		print addArray
 		array = np.add(array, addArray)
 		points.append(array)
 
@@ -103,7 +104,7 @@ def moveMolecule(array):
 	finalPoints.append(finalPoint1)
 	finalPoints.append(finalPoint2)
 	finalPoints.append(finalPoint3)
-
+	
 	putInPymol(finalPoints)
 
 	print 'between 1 and 2: ', euclideanDist(finalPoint1, finalPoint2)
@@ -115,7 +116,7 @@ def moveMolecule(array):
 
 def plot(x, y, z):
 	# Plots path of points
-	# Restructure so array values assigned to every N point
+	# Restructure so array values assigned to every 3 points
 	ptx1 = x[0::3]
 	pty1 = y[0::3]
 	ptz1 = z[0::3]
@@ -129,10 +130,13 @@ def plot(x, y, z):
 	fig = plt.figure()
 	ax = fig.add_subplot(111, projection='3d')
 
-	ax.scatter(ptx1, pty1, ptz1, c='red')
-	ax.scatter(ptx2, pty2, ptz2, c='blue')
-	ax.scatter(ptx3, pty3, ptz3, c='green')
-
+	# Increase size of points as steps increase
+	area = [2*n for n in range(len(ptx1))]
+	
+	ax.scatter(ptx1, pty1, ptz1, s=area, c='red')
+	ax.scatter(ptx2, pty2, ptz2, s=area, c='blue')
+	ax.scatter(ptx3, pty3, ptz3, s=area, c='green')
+	
 	plt.show()
 	
 
