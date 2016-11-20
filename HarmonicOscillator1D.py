@@ -66,7 +66,6 @@ def calculateV(array):
 	# Calculate potential for NNs
 	for r in radius:
 		V.append((4 * _e) * (((_d / r) ** 12) - ((_d / r) ** 6)))
-		print V
 	return V
 
 
@@ -133,13 +132,13 @@ def plot(x, y, z):
 	# Increase size of points as steps increase
 	area = [8*n for n in range(len(ptx1))]
 
-	# animate, iterating by i-th element from points
+	# Animate, iterating by 2* i-th element from points
 	def animate(i):
-		ax.scatter(ptx1[:i], pty1[:i], ptz1[:i], s=area, c='red')
-		ax.scatter(ptx2[:i], pty2[:i], ptz2[:i], s=area, c='blue')
-		ax.scatter(ptx3[:i], pty3[:i], ptz3[:i], s=area, c='green')
+		ax.scatter(ptx1[:(2*i)], pty1[:(2*i)], ptz1[:(2*i)], s=area, c='red')
+		ax.scatter(ptx2[:(2*i)], pty2[:(2*i)], ptz2[:(2*i)], s=area, c='blue')
+		ax.scatter(ptx3[:(2*i)], pty3[:(2*i)], ptz3[:(2*i)], s=area, c='green')
 
-	ani = FuncAnimation(fig, animate, frames=len(ptx1), interval=500)
+	ani = FuncAnimation(fig, animate, frames=len(ptx1), interval=200)
 	
 	plt.show()
 	
@@ -173,46 +172,9 @@ def putInPymol(array):
 
 
 class Test(unittest.TestCase):
-	data1 = [(2, (2, 3)), (3, (3, 3)), (0, (0, 3))]
-
-	data2 = [([2, 3],
-			 [1, 4],
-			 [3, 2]),
-			([2, 3],
-			 [2, 5],
-			 [4, 2],
-			 [5, 1],
-			 [4, 3])]
-
-	easy = [([0, 0, 0],
+	data = [([0, 0, 0],
 			 [1, 1, 0],
 			 [3, 1, 0])]
-
-	"""
-	# Test to see if generateAtoms generates
-	# the right size array
-	def test_generateAtoms(self):
-		for [test_num, expected_size] in self.data1:
-		    (actual_array, actual_size) = generateAtoms(test_num)
-		    self.assertEqual(actual_size, expected_size)
-	"""
-	"""
-	# Test to see if calculateV generates values
-	# Compare to calculated values
-	def test_calculateV(self):
-		for array in self.easy:
-			calculated_V = calculateV(array)
-			actual_V = [-7.1181416371322853e-19, 
-			-7.1181416371322853e-19, -1.3534136350801918e-19, 
-			-1.3534136350801918e-19]
-			self.assertEqual(calculated_V, actual_V)
-	"""
-	"""
-	# Test putting arrays into Pymol coords
-	def test_putInPymol(self):
-   		for array in self.easy:
-   			putInPymol(array)
-   	"""
 
 
    	def test_doItAll(self):
