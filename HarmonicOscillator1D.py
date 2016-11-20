@@ -34,22 +34,26 @@ def euclideanDist(point1, point2):
 	return spatial.distance.euclidean(point1, point2)
 
 
-def calculateV(array):
-	# Calculation of LJ potential using possible radii
-	# Returns potential in kJ/mol as an list with closest neighbor(s)
+def NNSearch(array):
+	# Query tree for nearest neighbors using KD tree
+	# Returns radius as list of NN distances
 	points = tuple(map(tuple, array))
 	radius = []
-	V = []
 
-	# Query tree for nearest neighbors using KD tree
-	# Returns indices of NN
-	# MAKE INTO SEPARATE FUNCTION
 	for n in points:
 		output = [i for i in points if i != n]
 		tree = spatial.KDTree(output)
 		index = tree.query_ball_point(x=n, r=3)
 		for i in index:
 			radius.append(euclideanDist(tree.data[i], n))
+	return radius
+
+def calculateV(array):
+	# Calculation of LJ potential using possible radii
+	# Returns potential in kJ/mol as an list with closest neighbor(s)
+	V = []
+	
+	radius  = NNSearch(array)
 	
 	# Calculate potential for NNs
 	for r in radius:
@@ -69,6 +73,7 @@ def moveMolecule(array):
 	z = []
 
 	# Moves molecules in random directions by adding random array
+	# Cutoff value chosen from minimum of function
 	while all(V > -0.09 for V in calculateV(array)):
 		addArray = np.random.random_sample(size=(len(array),3))
 		print addArray
@@ -196,7 +201,7 @@ class Test(unittest.TestCase):
    	"""
 
 
-   	def test_moveMolecules(self):
+   	def test_All(self):
    		array = generateAtoms(num)
    		print array
    		moveMolecule(array)
