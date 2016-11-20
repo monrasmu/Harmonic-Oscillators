@@ -1,6 +1,7 @@
 # Harmonic Oscillator N-D
 # Uses LJ potential to calculate minimum
 # bond distance for n H2 atoms
+# ONLY WORKING FOR 3 ATOMS RIGHT NOW
 
 import unittest
 import numpy as np
@@ -24,7 +25,8 @@ def generateAtoms(num):
 	# Generates a random 3D array of num x 3 size
 	array = np.random.rand(num, 3)
 	array_size = array.shape
-	return array, array_size
+	array = np.squeeze(array)
+	return array
 
 
 def euclideanDist(point1, point2):
@@ -67,12 +69,11 @@ def moveMolecule(array):
 	z = []
 
 	# Moves molecules in random directions by adding random array
-	# Increase step size by increasing 'high'
-	while all(V > -0.097 for V in calculateV(array)):
-		addArray = np.random.uniform(low=0, high=0.01, size=(len(array),3))
+	while all(V > -0.09 for V in calculateV(array)):
+		addArray = np.random.random_sample(size=(len(array),3))
+		print addArray
 		array = np.add(array, addArray)
 		points.append(array)
-
 
 	# Extract points for plotting
 	points = np.squeeze(points)
@@ -104,7 +105,6 @@ def moveMolecule(array):
 def plot(x, y, z):
 	# Plots path of points
 	# Restructure so array values assigned to every N point
-	# FIX! ONLY WORKS FOR 3 PTS RN
 	ptx1 = x[0::3]
 	pty1 = y[0::3]
 	ptz1 = z[0::3]
@@ -195,9 +195,15 @@ class Test(unittest.TestCase):
    			putInPymol(array0
    	"""
 
+
    	def test_moveMolecules(self):
+   		array = generateAtoms(num)
+   		print array
+   		moveMolecule(array)
+   		"""
    		for array in self.easy:
    			moveMolecule(array)
+   		"""
    	
 
 if __name__ == "__main__":
