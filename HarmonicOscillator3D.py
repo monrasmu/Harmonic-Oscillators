@@ -1,10 +1,11 @@
 # Harmonic Oscillator N-D
-# Uses LJ potential to calculate minimum
-# bond distance for n H2 atoms
-# ONLY WORKING FOR 3 ATOMS RIGHT NOW
+# Uses LJ potential to calculate minimum bond distance for n H2 atoms
+# Currently only working for 3 atoms
 
 import unittest
 import time
+import sys
+import operator
 import numpy as np
 from scipy import spatial
 import matplotlib.pyplot as plt
@@ -15,21 +16,51 @@ from matplotlib.animation import FuncAnimation
 # Constants from LJ potential
 # e: H well depth
 # d: H van der Waals radius
-# Wilhelm, E.; Battino, R. J Chem Physics 1971, 55, 4012
+	# Wilhelm, E.; Battino, R. J Chem Physics 1971, 55, 4012
 _e = 0.09794  # kj/mol
 _d = 1.09     # angstroms
 
-# Number of atoms
 # Variable to be changed as needed
-num = 3
+# Number of atoms
+# Number of steps (5000 appears to be optimal)
+num = 4
+steps = 5000
+
 
 def doItAll(num):
 	# It does it all!
-	# Generates random atoms and moves them to minimums
-	array = generateAtoms(num)
-	calculateV(array)
-	#moveMolecule(array)
+	# Generates random atoms and moves them to find mimumum potential
+	# Updates a progress bar
+	# Then plots points and puts final in PDB format
+	# But wait, there's more!
+	# Times the program too
 
+	tic = time.clock()
+
+	progress = 0
+        for step in range(steps):
+            progress = updateProgressBar(progress, step, steps)
+
+	print '\n'
+
+	array = generateAtoms(num)
+	arrayPoints, vArray = moveMolecule(array, numSteps=steps)
+	plotMolecule(arrayPoints)
+
+	print min(vArray), " kJ/mol is the minimum potential achieved"
+
+	toc = time.clock()
+	print (toc - tic), "seconds to run full function"
+
+def updateProgressBar(progress, step, steps):
+    # Progress bar
+    # Taken from EECS183 final project 
+    progress += 1
+    hashes = ("#" * ((progress * 50) / steps)).ljust(50)
+    progressBar = "\r[ " + hashes + " ] Operation in progress..."
+    sys.stdout.write(progressBar)
+    sys.stdout.flush()
+    return progress
 
 def generateAtoms(num):
 	# Generates a random 3D array of num x 3 size
@@ -53,96 +84,99 @@ def NNSearch(array):
 	for n in points:
 		output = [i for i in points if i != n]
 		tree = spatial.KDTree(output)
-		index = tree.query_ball_point(x=n, r=3)
+		index = tree.query_ball_point(x=n, r=2)
 		for i in index:
 			radius.append(euclideanDist(tree.data[i], n))
+	
 	return radius
 
-def calculateV(array):
-	# Calculation of LJ potential using possible radii
-	# Returns potential in kJ/mol as an list with closest neighbor(s)
+
+def functionV(r):
+		return (4 * _e) * (((_d / r) ** 12) - ((_d / r) ** 6))
+
+
+def sumV(array):
+	# Uses NN search to calculate sum of potential of system
 	V = []
-	
+
 	radius  = NNSearch(array)
 	
 	# Calculate potential for NNs
 	for r in radius:
-		V.append((4 * _e) * (((_d / r) ** 12) - ((_d / r) ** 6)))
-
-	def functionV(x, y):
-		r = euclideanDist(x, y)
-		return (4 * _e) * (((_d / r) ** 12) - ((_d / r) ** 6))
-
-	eulerMethod(functionV, 1, 10)
-	return V
+		V.append(functionV(r))
+	return sum(V)
 
 
-def sumV(array):
-	return sum(array)
+"""
+def eulerMethod(function, array, numsteps):
+	stepSize = 0.1
+	v0 = function(array)
 
-def gradientV(array):
-	grad = np.gradient(array)
-	print grad
-	return grad
+	vArray = []
+	arrayPoints = []
 
-def eulerMethod(function, guess, numsteps):
-	x1 = guess
-	x2 = guess + 0.1
-	y1 = function(x1)
-	y2 = function(x2)
-	dx = (y2 - y1) / (x2 - x1)
+	# Pass an array of points
+	# Function returns potential of system and the array of points
+	for n in range(1, numsteps):
+		m = function(array)
+		v1 = v0  + stepSize * m
+		array1 = [(x + stepSize) for x in array]
+		arrayPoints.append(array)
+		vArray.append(v1)
+		array = array1
+		v0 = v1
+	return vArray, arrayPoints
+"""
 
-	for n in range(numsteps):
-		y[n + 1] =y[n] + dx*function(x[n], y[n])
-	print y
-	return y
+
+def moveMolecule(array, numSteps):
+	# Moves molecules in random directions by adding random array
+	# Will not move points if sum of potential increases
+	points = []
+	vArray = []
+
+	for i in range(numSteps):
+		addArray = np.random.uniform(low=-0.1, high=0.1, size=(len(array),3))
+		if sumV(np.add(array, addArray)) < sumV(array):
+			array = np.add(array, addArray)
+		else: 
+			array = array
+		points.append(array)
+		vArray.append(sumV(array))
+
+	return points, vArray
 
 
-def moveMolecule(array):
-	# Moves molecules around to find minimum bond distance
-	# Stop when potential below LJ potential for H2
-	# Plots path of points
-	# Puts final output into Pymol
+def plotMolecule(array):
+	# Setup for plotting points
+	# Puts final output into Pymol and calls plot to plot
 
 	points = []
+	finalPointN = []
 	x = []
 	y = []
 	z = []
 
-	# Moves molecules in random directions by adding random array
-	# Cutoff value chosen from minimum of function
-	timestop = time.time() + 5    # 5 seconds
-	while all(V > -0.09 for V in calculateV(array)):
-		addArray = np.random.uniform(low=-1, high=1, size=(len(array),3))
-		array = np.add(array, addArray)
-		points.append(array)
-		if time.time() > timestop:
-			break
-
 	# Extract points for plotting
-	points = np.squeeze(points)
+	points = np.squeeze(array)
 	for i in points:
 		for j in i:
 			x.append(j[0])
 			y.append(j[1])
 			z.append(j[2])
 
-	finalPoint1 = (x[-3], y[-3], z[-3])
-	finalPoint2 = (x[-2], y[-2], z[-2])
-	finalPoint3 = (x[-1], y[-1], z[-1])
-	finalPoints = []
-	finalPoints.append(finalPoint1)
-	finalPoints.append(finalPoint2)
-	finalPoints.append(finalPoint3)
+	for n in range(num):
+		finalPointN.append((x[-n], y[-n], z[-n]))	
+
+	putInPymol(finalPointN)
+
+	for n in range(num):
+		for m in range(1, num):
+			if n != m:
+				print 'between %i and %i: '  % ((n + 1), (m + 1)), euclideanDist(finalPointN[n], finalPointN[m])
+
+	#plot(x, y, z)
 	
-	putInPymol(finalPoints)
-
-	print 'between 1 and 2: ', euclideanDist(finalPoint1, finalPoint2)
-	print 'between 1 and 3: ', euclideanDist(finalPoint1, finalPoint3)
-	print 'between 2 and 3: ', euclideanDist(finalPoint3, finalPoint2)
-
-	plot(x, y, z)
-
 
 def plot(x, y, z):
 	# Plots path of points
@@ -176,6 +210,7 @@ def plot(x, y, z):
 
 def putInPymol(array):
 	# Organizes array into Pymol readable format
+	# NEED TO FIX TO ACCEPT NEGATIVES
 
 	# Get dimensions of array and flatten to make life easier
 	x = np.array(array)
@@ -201,7 +236,7 @@ def putInPymol(array):
 		file.write('\n')
 	file.close()
 
-
+"""
 class Test(unittest.TestCase):
 	data = [([0, 0, 0],
 			 [1, 1, 0],
@@ -210,7 +245,8 @@ class Test(unittest.TestCase):
 
    	def test_doItAll(self):
    		doItAll(num)
-
+"""
 
 if __name__ == "__main__":
-	unittest.main()
+	doItAll(num)
+	#unittest.main()
