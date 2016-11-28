@@ -37,7 +37,6 @@ def doItAll(num):
 	array = generateAtoms(num)
 	arrayPoints, vArraySum = moveMolecule(array, numSteps=steps)
 	plotSetUp(arrayPoints)
-	print '\n'
 	print min(vArraySum)," kJ/mol is the minimum potential achieved for the system"
 	toc = time.clock()
 	print round((toc - tic), 3), "seconds to run"
@@ -80,7 +79,7 @@ def NNSearch(points):
 	for n in points:
 		output = [i for i in points if i != n]
 		tree = spatial.KDTree(output)
-		index = tree.query_ball_point(x=n, r=3)
+		index = tree.query_ball_point(x=n, r=2)
 		for i in index:
 			radius.append(euclideanDist(tuple(tree.data[i]), n))
 	return radius
@@ -173,7 +172,7 @@ def moveMolecule(array, numSteps):
 		# Updates progress bar
 		progress = updateProgressBar(progress, i, numSteps)
 
-	# Pass two atoms to plotV to plot
+	# Pass atoms to plotV to plot
 	plotV(points, vArray)
 
 	return points, vArraySum
@@ -185,6 +184,7 @@ def plotV(points, vArray):
 	vPoints = []
 	vArray = np.squeeze(vArray)
 
+	# Gets distance between first two points to plot example V vs radius
 	for n in range(steps):
 		radius.append(euclideanDist(points[n][0], points[n][1]))
 		vPoints.append(vArray[n][0])
@@ -206,12 +206,14 @@ def plotV(points, vArray):
 def plotSetUp(array):
 	# Setup for plotting points
 	# Puts final output into Pymol and calls plot to plot
+	# Prints average bond distance !OJO! New fxn
 	points = []
 	finalPointN = []
+	intialPointN = []
 	x = []
 	y = []
 	z = []
-	radii = []
+	radius = []
 
 	# Extract points for plotting
 	points = np.squeeze(array)
@@ -222,7 +224,8 @@ def plotSetUp(array):
 			z.append(j[2])
 
 	for n in range(num):
-		finalPointN.append((x[-n], y[-n], z[-n]))	
+		finalPointN.append((x[-num + n], y[-num + n], z[-num + n]))
+		intialPointN.append((x[n], y[n], z[n]))	
 	
 	putInPymol(finalPointN)
 
@@ -236,13 +239,15 @@ def plotSetUp(array):
 	"""
 
 	# Prints average bond distance to neighbors
-	# print '\n', 'Average bond distance is', sum(NNSearch(finalPointN)) / len(NNSearch(finalPointN))
+	print '\n'
+	print 'Average bond distance is', sum(NNSearch(finalPointN)) / len(NNSearch(finalPointN))
 
-	plot(x, y, z)
+	plot(intialPointN, finalPointN)
 	
 
-def plot(x, y, z):
+def plot(initial, final):
 	# Plots initial and final output
+	# Input must be array of tuples of points
 	ptxN = []
 	ptyN = []
 	ptzN = []
@@ -250,13 +255,13 @@ def plot(x, y, z):
 	pty1 = []
 	ptz1 = []
 	for n in range(num):
-		ptxN.append(x[-n + 1])
-		ptyN.append(y[-n + 1])
-		ptzN.append(z[-n + 1])
-		ptx1.append(x[n + 1])
-		pty1.append(y[n + 1])
-		ptz1.append(z[n + 1])
-	
+		ptxN.append(final[n][0])
+		ptyN.append(final[n][1])
+		ptzN.append(final[n][2])
+		ptx1.append(initial[n][0])
+		pty1.append(initial[n][1])
+		ptz1.append(initial[n][2])
+
 	fig = plt.figure()
 	ax = fig.add_subplot(2, 1, 1, projection='3d')
 	ax.set_title('Initial')
