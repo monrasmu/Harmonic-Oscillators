@@ -20,8 +20,8 @@ _d = 1.09     # angstroms
 # Variable to be changed as needed
 # Number of atoms
 # Number of steps
-num = 10
-steps = 500
+num = 20
+steps = 1000
 
 
 def doItAll(num):
