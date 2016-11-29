@@ -31,7 +31,7 @@ def doItAll(num):
 	# Then plots points and puts final in PDB format
 	# But wait, there's more!
 	# Times the program too
-	newlist = []
+
 	tic = time.clock()
 
 	array = generateAtoms(num)
