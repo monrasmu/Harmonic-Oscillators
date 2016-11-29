@@ -20,7 +20,7 @@ _d = 1.09     # angstroms
 # Variable to be changed as needed
 # Number of atoms
 # Number of steps
-num = 20
+num = 10
 steps = 1000
 
 
@@ -38,6 +38,7 @@ def doItAll(num):
 	arrayPoints, vArraySum = moveMolecule(array, numSteps=steps)
 	plotSetUp(arrayPoints)
 	print min(vArraySum)," kJ/mol is the minimum potential achieved for the system"
+	
 	toc = time.clock()
 	print round((toc - tic), 3), "seconds to run"
 
