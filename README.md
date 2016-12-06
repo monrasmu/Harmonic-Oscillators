@@ -1,4 +1,4 @@
-"# Harmonic-Oscillators" 
+# Harmonic Oscillator in 3D
 
 Project studying the Lennard-Jones potential of N atoms.
 
